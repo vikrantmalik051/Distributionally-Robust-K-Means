@@ -1,0 +1,88 @@
+function [M_next, PI_next, wQE] = findNextM_v6(M, PI, X, gamma, L, beta, d)
+    K = size(M,3);
+    N = size(X,2);
+    
+    M = reshape(M, d, K);
+
+    C = sum(X.*X, 1)' - 2 * X' * M + sum(M.*M, 1);
+    alpha = 1/(gamma-1);
+    gamma_inv = 1/gamma;
+    
+    %onesK = ones(1,K);
+    %onesN = ones(1,N);
+
+    PI = zeros(K, N);
+
+    Aeq = [ones(1, K); zeros(K-1, K)];
+    beq = [1; zeros(K-1, 1)];
+    lb = zeros(K,1);
+    H = (1/(gamma - 1))*(M'*M);
+    options = optimoptions('quadprog','Display','off');
+
+
+    for i = 1:N
+        xn = X(:, i);
+        dists = vecnorm(xn - M, 2, 1).^2;
+        f = dists - (2/(gamma - 1))*(xn'*M);
+        PI_next(:, i) = quadprog(H, f, [], [], Aeq, beq, lb, [], [], options);
+    end
+        
+    PiPit = PI_next * PI_next'; %N x N
+    Pi = sum(PI_next, 2)'; %1 x N
+    
+    D = PiPit ./ Pi;
+    CC = (X * PI_next') ./ Pi;
+    I = eye(K);
+
+    M_next  = CC / (I + gamma_inv * (D-I));
+
+    wQE =  (trace(PI_next*C) + alpha * norm(X-M*PI_next,'fro')^2)/N;
+end
+
+
+
+
+function wQE = wcefff(M, X, gamma, d)
+%  M:    d x K data matrix
+%  X:    d x N 
+
+    K = size(M,2);
+    N = size(X,2);
+    
+    M = reshape(M, d, K);
+
+    C = sum(X.*X, 1)' - 2 * X' * M + sum(M.*M, 1);
+    alpha = 1/(gamma-1);
+    gamma_inv = 1/gamma;
+    
+    %onesK = ones(1,K);
+    %onesN = ones(1,N);
+
+    PI = zeros(K, N);
+
+    Aeq = [ones(1, K); zeros(K-1, K)];
+    beq = [1; zeros(K-1, 1)];
+    lb = zeros(K,1);
+    H = (1/(gamma - 1))*(M'*M);
+    options = optimoptions('quadprog','Display','off');
+
+
+    for i = 1:N
+        xn = X(:, i);
+        dists = vecnorm(xn - M, 2, 1).^2;
+        f = dists - (2/(gamma - 1))*(xn'*M);
+        PI_next(:, i) = quadprog(H, f, [], [], Aeq, beq, lb, [], [], options);
+    end
+        
+    PiPit = PI_next * PI_next'; %N x N
+    Pi = sum(PI_next, 2)'; %1 x N
+    
+    D = PiPit ./ Pi;
+    CC = (X * PI_next') ./ Pi;
+    I = eye(K);
+
+    M_next  = CC / (I + gamma_inv * (D-I));
+
+    wQE =  (trace(PI_next*C) + alpha * norm(X-M*PI_next,'fro')^2)/N;
+end
+
