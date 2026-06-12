@@ -142,4 +142,4 @@ If you use this code, please cite the associated paper (if applicable).
 
 ## License
 
-[Add your license here]
+This project is licensed under the [MIT License](LICENSE).
