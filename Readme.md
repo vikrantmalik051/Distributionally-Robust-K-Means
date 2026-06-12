@@ -138,7 +138,7 @@ On NIPS dataset with 5% outliers:
 
 ## Citation
 
-If you use this code, please cite the associated paper (if applicable).
+If you use this code, please cite the associated paper.
 
 ## License
 
